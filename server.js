@@ -45,14 +45,14 @@ app.get('/films/', (req, res) => {
     if(!['title','genre','rentals','rentalPrice','ranking'].includes(order)){
         order = 'title'
     }
-    let sql = `SELECT f.title,f.rental_rate as price,f.rating as ranking ,c.name as genre, count(r.rental_id) as rentals FROM film f JOIN film_category fc on f.film_id=fc.film_id JOIN category c on fc.category_id=c.category_id JOIN inventory i on f.film_id=i.film_id JOIN rental r on i.inventory_id=r.inventory_id group by f.title,f.rental_rate,f.rating,c.name ORDER BY ${connection.escapeId(order)} ${sort} limit ? offset ? `
+    let sql = `SELECT f.title,f.rental_rate as price,f.rating as ranking ,c.name as genre, count(r.rental_id) as rentals FROM film f LEFT JOIN film_category fc on f.film_id=fc.film_id LEFT JOIN category c on fc.category_id=c.category_id LEFT JOIN inventory i on f.film_id=i.film_id LEFT JOIN rental r on i.inventory_id=r.inventory_id group by f.title,f.rental_rate,f.rating,c.name ORDER BY ${connection.escapeId(order)} ${sort} limit ? offset ? `
     return connection.query(sql,[limit,offset], (err, results) => {
         if (err) {
             console.log('Error fetching films: ', err);
             res.status(500).send('Error fetching films');
         } else {
             // Récupérer le nombre total d'éléments
-            let sqlCount = 'SELECT COUNT(*) as count FROM (SELECT f.title,f.rental_rate as price,f.rating as ranking ,c.name as genre, count(r.rental_id) as rentals FROM film f JOIN film_category fc on f.film_id=fc.film_id JOIN category c on fc.category_id=c.category_id JOIN inventory i on f.film_id=i.film_id JOIN rental r on i.inventory_id=r.inventory_id GROUP BY f.title,f.rental_rate,f.rating,c.name) as subquery;';
+            let sqlCount = 'SELECT COUNT(film_id) as count FROM film';
             connection.query(sqlCount, (err, countResult) => {
                 if (err) {
                     console.log('Error fetching count: ', err);
@@ -70,7 +70,6 @@ app.get('/films/', (req, res) => {
     });
 
 });
-
 
 
 const port = process.env.PORT || 5000;
