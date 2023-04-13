@@ -27,9 +27,6 @@ connection.connect((err) => {
     }
 });
 
-app.get('/api/hello', (req, res) => {
-    res.send({ express: 'Hello From Express' });
-});
 
 app.get('/films/', (req, res) => {
     let limit = parseInt(req.query.limit)??10
